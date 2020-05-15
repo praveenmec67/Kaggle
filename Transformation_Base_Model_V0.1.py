@@ -158,28 +158,20 @@ def dept_agg():
 
 def upc_prob():
 
-  #  df_upc_prob=df_dept.groupby(['dept_id','store_id','Date'])['Sales'].sum()
-  #  df_upc_prob=df_upc_prob.reset_index()
-  #  df_upc_prob=df_upc_prob.rename(columns={'Sales':'Dept Sales'})
-  #  df_upc_prob=df_upc_prob.ffill()
-  #  df_upc_prob = df_dept.rename(columns={'Sales': 'Dept Sales'})
-
     df_trial=df_final[['item_id','dept_id','store_id','Date','Sales']]
     df_dept_ratio=df_dept[['dept_id','store_id','Date','Dept Sales']]
 
-  # df_merge=df_trial.merge(df_upc_prob,how='inner',on=['dept_id','store_id','Date'])
     df_merge=df_trial.merge(df_dept,how='inner',on=['dept_id','store_id','Date'])
     print(df_merge.head(10))
+    
     df_merge['Ratio'] = df_merge['Sales'] / df_merge['Dept Sales']
-
-
     print(df_merge.head(10))
 
 
 #Calling the functions:
 
-#process_train_cal()
-#train_features()
+process_train_cal()
+train_features()
 cat_agg()
 dept_agg()
 upc_prob()
