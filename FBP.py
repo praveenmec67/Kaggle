@@ -27,32 +27,54 @@ df_foods=df_foods[['store_id','Date','Sales']]
 df_foods.columns=['store_id','ds','y']
 stores={'CA_1':1,'CA_2':2,'CA_3':3,'CA_4':4,'TX_1':5,'TX_2':6,'TX_3':7,'WI_1':8,'WI_2':9,'WI_3':10}
 df_foods['store_id']=df_foods['store_id'].map(stores)
-print(df_foods.tail())
+
+#df_foods_train=df_foods.iloc[1913:3796,:]
+#df_foods_test=df_foods.iloc[3796:3826,:]
+#y_test_df=df_foods_test[['y']].reset_index().drop('index',axis=1)
+#print(y_test_df.head())
+#y_test=df_foods_test['y']
+
+#print(df_foods_train.head())
+#print(df_foods_train.tail())
+#print(df_foods_train.shape)
+#print(df_foods_test.shape)
 
 
-print('entering model')
+
 fb = Prophet(interval_width=0.95,yearly_seasonality=True,weekly_seasonality=True)
 fb.add_country_holidays(country_name='US')
 fb.add_regressor('store_id')
 fb.fit(df_foods)
+#fb.fit(df_foods_train)
 
 
-future = fb.make_future_dataframe(freq='D', periods=28,include_history=False)
-print(future.tail())
+future = fb.make_future_dataframe(freq='D',periods=28,include_history=False)
+#future=df_foods_test['ds']
+print(future)
 
 a=pd.Series([1,2,3,4,5,6,7,8,9,10])
 stores1=pd.DataFrame({'store_id':a.repeat(28)}).reset_index()
-print(stores1.head())
 
 
-future['store_id']=stores1['store_id']
-print(future.tail())
-predict = fb.predict(future)
-print(predict['yhat'])
+final_df=pd.concat([future]*10).reset_index().drop('index',axis=1)
+#stores1=stores1.iloc[30:60,:].reset_index().drop('index',axis=1)
+final_df['store_id']=stores1['store_id']
+predict = fb.predict(final_df)
+y_pred_df=predict[['yhat']]
+#y_pred=predict['yhat']
 
+final=pd.concat([final_df,y_pred_df],axis=1)
+print(final.head())
 
-#res=mean_absolute_error(df_foods_test['y'],predict['yhat'])
+#comp=pd.concat([final,y_test_df],axis=1)
+#print(comp.head())
+
+#res=mean_absolute_error(y_test,y_pred)
+#mape=np.mean(np.abs((np.array(y_test) - np.array(y_pred)) / y_test)) * 100
 #print(res)
+#print(mape)
+
+
 #fig=fb.plot(predict)
 #plt.show()
 #fig1=fb.plot_components(predict)
