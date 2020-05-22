@@ -36,9 +36,9 @@ future = fb.make_future_dataframe(freq='D',periods=28,include_history=False)
 
 s=pd.Series([1,2,3,4,5,6,7,8,9,10])
 d=pd.Series([1,2,3,4,5,6,7])
-stores1=pd.DataFrame({'store_id':s.repeat(28)}).reset_index()
+stores1=pd.DataFrame({'store_id':s.repeat(56)}).reset_index()
 stores1=pd.concat([stores1]*7).reset_index().drop('index',axis=1)
-dept1=pd.DataFrame({'dept_id':d.repeat(280)}).reset_index()
+dept1=pd.DataFrame({'dept_id':d.repeat(560)}).reset_index()
 
 
 final_df=pd.concat([future]*70).reset_index().drop('index',axis=1)
