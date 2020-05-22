@@ -38,9 +38,9 @@ future = fb.make_future_dataframe(freq='D',periods=28,include_history=False)
 
 s=pd.Series([1,2,3,4,5,6,7,8,9,10])
 c=pd.Series([1,2,3])
-stores1=pd.DataFrame({'store_id':s.repeat(28)}).reset_index()
+stores1=pd.DataFrame({'store_id':s.repeat(56)}).reset_index()
 stores1=pd.concat([stores1]*3).reset_index().drop('index',axis=1)
-cat1=pd.DataFrame({'cat_id':s.repeat(280)}).reset_index()
+cat1=pd.DataFrame({'cat_id':s.repeat(560)}).reset_index()
 
 
 final_df=pd.concat([future]*30).reset_index().drop('index',axis=1)
