@@ -33,7 +33,7 @@ fb.add_country_holidays(country_name='US')
 fb.add_regressor('store_id')
 fb.add_regressor('cat_id')
 fb.fit(df_cat_pred)
-future = fb.make_future_dataframe(freq='D',periods=28,include_history=False)
+future = fb.make_future_dataframe(freq='D',periods=56,include_history=False)
 
 
 s=pd.Series([1,2,3,4,5,6,7,8,9,10])
