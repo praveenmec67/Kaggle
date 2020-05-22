@@ -48,7 +48,7 @@ fb.fit(df_foods)
 #fb.fit(df_foods_train)
 
 
-future = fb.make_future_dataframe(freq='D',periods=28,include_history=False)
+future = fb.make_future_dataframe(freq='D',periods=56,include_history=False)
 #future=df_foods_test['ds']
 print(future)
 
