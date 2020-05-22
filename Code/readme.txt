@@ -1,2 +1,2 @@
 
-Models for the competition...
+Models for the competition
