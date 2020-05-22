@@ -1,4 +1,4 @@
-dept_id,store_id,Date,Forecasted Sales
+,dept_id,store_id,Date,Forecasted Sales
 0,FOODS_1,CA_1,2016-04-25,883.1307232624674
 1,FOODS_1,CA_1,2016-04-26,757.0548671758046
 2,FOODS_1,CA_1,2016-04-27,416.902935614914
