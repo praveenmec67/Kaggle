@@ -49,7 +49,6 @@ final_df['dept_id']=dept1['dept_id']
 predict = fb.predict(final_df)
 y_pred_df=predict[['yhat']]
 
-
 final=pd.concat([final_df,y_pred_df],axis=1)
 stores2={1:'CA_1',2:'CA_2',3:'CA_3',4:'CA_4',5:'TX_1',6:'TX_2',7:'TX_3',8:'WI_1',9:'WI_2',10:'WI_3'}
 dept2={1:'FOODS_1',2:'FOODS_2',3:'FOODS_3',4:'HOUSEHOLD_1',5:'HOUSEHOLD_2',6:'HOBBIES_1',7:'HOBBIES_2'}
