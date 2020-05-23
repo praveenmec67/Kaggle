@@ -1,2 +1,2 @@
 
-Plots
+Plot
