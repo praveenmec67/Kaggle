@@ -112,8 +112,6 @@ for i in items:
         y_pred = xgb.predict(X_pred)
         sub1=pd.concat([sub1,pd.DataFrame(y_pred)],axis=0,ignore_index=True)
         j = j + 1
-    else:
-        break
 
 
 stop = time.time()
