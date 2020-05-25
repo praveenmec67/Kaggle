@@ -81,7 +81,7 @@ j = 1
 # Training file creation and model build:
 for i in items:
 
-    if j <= 50:
+
         print(i)
         df1 = df_master.loc[df_master['item_id'] == i]
         df1 = pd.melt(id_vars=['store_id'], value_vars=df_master.iloc[:, 5:], var_name='Date', value_name='Sales',frame=df1)
@@ -136,4 +136,5 @@ print(pred_sub.tail())
 pred_sub.to_csv('pred_sub.csv')
 
 stop = time.time()
+print(j)
 print("--- %s seconds ---" % (time.time() - start))
