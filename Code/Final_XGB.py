@@ -49,7 +49,6 @@ fun1 = lambda x: 1 if x == True else (0)
 
 
 
-
 # Creation of prediction file:
 
 K = 56
@@ -69,13 +68,13 @@ predict_df['yearstart'] = predict_df['yearstart'].apply(fun1)
 cal_pred['date'] = pd.to_datetime(cal_pred['date'])
 df2 = pd.merge(cal_pred, predict_df, how='left', left_on=['date'], right_on=['predict_dates'])
 df2 = df2.sort_values(['store_id', 'date'])
-print(df2.head(60))
 df2 = df2.drop(['predict_dates', 'date','events_type_1_1','events_type_2_1'], axis=1)
 df2 = df2.reindex(columns=['store_id', 'snap_CA', 'snap_TX', 'snap_WI', 'events_name_1_1', 'events_name_2_1', 'dayofyear', 'dayofweek', 'weekofyear', 'weekend', 'monthstart', 'quarterstart','yearstart'])
 
 
 
 #Into the Model:
+
 start = time.time()
 j = 1
 
@@ -128,40 +127,46 @@ sub2['predict_dates'] = pd.concat([pd.DataFrame(pd.date_range(start='2016/04/25'
 sub2=pd.concat([sub2]*3049).reset_index().drop('index',axis=1)
 
 pred_sub=pd.concat([sub2,sub1],axis=1)
-print(pred_sub.head())
-print(pred_sub.iloc[:560,:])
-print(pred_sub.tail())
 pred_sub.to_csv('pred_sub.csv')
 
-#Transformation:
 
-df=pd.read_csv('pred_sub.csv').drop('Unnamed: 0',axis=1)
-df=df.sort_values(['store_id','predict_dates']).reset_index()
-df2=pd.DataFrame()
-df4=pd.DataFrame()
-c = 2
-i = 0
-j = 85372
-while(c<=21):
+#Submission file creation:
 
-    if c%2==0:
-        df1=df.iloc[i:j,:]
-        df2=df2.append(df1)
-        i=i+85372
-        j=j+85372
-        c=c+1
-    else:
-        df3=df.iloc[i:j,:]
-        df4=df4.append(df3)
-        i=i+85372
-        j=j+85372
-        c=c+1
+df1_sales_train=pd.read_csv('sales_train_validation.csv')
+pred_file = pd.read_csv('pred_sub.csv')
 
 
-print(df2.shape)
-df2.to_csv('sub_0_28_day.csv')
-print(df4.shape)
-df4.to_csv('sub_28_56_day.csv')
+id = df1_sales_train['id'].unique()
+unique_values = [ele for ele in id for i in range(0,56)]
+pred_file = pred_file.drop(['Unnamed: 0','store_id'],axis =1)
+pred_file.columns=['Date','Sales']
+pred_file['id'] = unique_values
+
+
+pred_file = pred_file.pivot(index='id',columns='Date')
+
+
+submission_01 = pd.DataFrame()
+submission_02 = pd.DataFrame()
+submission_01['id'] = pred_file.index
+submission_02['id'] = pred_file.index
+Temp_01 = pred_file['Sales'].iloc[:,0:28]
+Temp_02 = pred_file['Sales'].iloc[:,28:]
+submission_01 = pd.merge(left=submission_01,right=Temp_01,on=['id'],how='right')
+submission_02 = pd.merge(left=submission_02,right = Temp_02 ,on=['id'],how='right')
+
+
+
+Columns_Final_List = ['F{0}'.format(i) for i in range(0,29)]
+submission_01.columns=Columns_Final_List
+submission_02.columns=Columns_Final_List
+Submission_File = pd.concat([submission_01,submission_02],axis=0,ignore_index=True)
+Submission_File = Submission_File.rename(columns={'F0':'id'})
+sample_submission = pd.read_csv('sample_submission.csv')
+Submission_File['id'] = sample_submission['id']
+cols = Submission_File.columns
+Submission_File[cols[1:]] = Submission_File[cols[1:]].round(0)
+Submission_File.to_csv('final_submission.csv',index=False)
 
 
 stop = time.time()
