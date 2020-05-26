@@ -31,21 +31,21 @@ df2_sales_train = df_sales_train.iloc[:, 6:].rename(columns=cal_dict)
 df_master = pd.concat([df1_sales_train, df2_sales_train], axis=1).drop('id', axis=1)
 
 
+
+#Initializing and Mapping:
 items = df_master['item_id'].unique()
 state = df_master['state_id'].unique()
 stores = df_master['store_id'].unique()
-
-
-stores1 = {'CA_1': 1, 'CA_2': 2, 'CA_3': 3, 'CA_4': 4, 'TX_1': 5, 'TX_2': 6, 'TX_3': 7, 'WI_1': 8, 'WI_2': 9,'WI_3': 10}
-state1 = {'CA': 1, 'TX': 2, 'WI': 3}
-fun = lambda x: 1 if (x==4)| (x == 5) | (x == 6) else (0)
-fun1 = lambda x: 1 if x == True else (0)
 df_comp = pd.DataFrame()
 predict_df = pd.DataFrame()
 y_pred_series=pd.Series()
 sub1=pd.DataFrame()
 sub2=pd.DataFrame()
 result = []
+stores1 = {'CA_1': 1, 'CA_2': 2, 'CA_3': 3, 'CA_4': 4, 'TX_1': 5, 'TX_2': 6, 'TX_3': 7, 'WI_1': 8, 'WI_2': 9,'WI_3': 10}
+state1 = {'CA': 1, 'TX': 2, 'WI': 3}
+fun = lambda x: 1 if (x==4)| (x == 5) | (x == 6) else (0)
+fun1 = lambda x: 1 if x == True else (0)
 
 
 
@@ -55,8 +55,7 @@ result = []
 K = 56
 elements = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 predict_df['store_id'] = [ele for ele in elements for i in range(K)]
-predict_df['predict_dates'] = pd.concat([pd.DataFrame(pd.date_range(start='2016/04/25', end='2016/06/19'))] * 10,
-                                        axis=0, ignore_index=True)
+predict_df['predict_dates'] = pd.concat([pd.DataFrame(pd.date_range(start='2016/04/25', end='2016/06/19'))] * 10,axis=0, ignore_index=True)
 predict_df['dayofyear'] = pd.DatetimeIndex(predict_df['predict_dates']).dayofyear
 predict_df['dayofweek'] = pd.DatetimeIndex(predict_df['predict_dates']).dayofweek
 predict_df['weekofyear'] = pd.DatetimeIndex(predict_df['predict_dates']).weekofyear
@@ -70,8 +69,10 @@ predict_df['yearstart'] = predict_df['yearstart'].apply(fun1)
 cal_pred['date'] = pd.to_datetime(cal_pred['date'])
 df2 = pd.merge(cal_pred, predict_df, how='left', left_on=['date'], right_on=['predict_dates'])
 df2 = df2.sort_values(['store_id', 'date'])
+print(df2.head(60))
 df2 = df2.drop(['predict_dates', 'date','events_type_1_1','events_type_2_1'], axis=1)
 df2 = df2.reindex(columns=['store_id', 'snap_CA', 'snap_TX', 'snap_WI', 'events_name_1_1', 'events_name_2_1', 'dayofyear', 'dayofweek', 'weekofyear', 'weekend', 'monthstart', 'quarterstart','yearstart'])
+
 
 
 #Into the Model:
@@ -80,7 +81,6 @@ j = 1
 
 # Training file creation and model build:
 for i in items:
-
 
         print(i)
         df1 = df_master.loc[df_master['item_id'] == i]
@@ -133,6 +133,37 @@ print(pred_sub.iloc[:560,:])
 print(pred_sub.tail())
 pred_sub.to_csv('pred_sub.csv')
 
+#Transformation:
+
+df=pd.read_csv('pred_sub.csv').drop('Unnamed: 0',axis=1)
+df=df.sort_values(['store_id','predict_dates']).reset_index()
+df2=pd.DataFrame()
+df4=pd.DataFrame()
+c = 2
+i = 0
+j = 85372
+while(c<=21):
+
+    if c%2==0:
+        df1=df.iloc[i:j,:]
+        df2=df2.append(df1)
+        i=i+85372
+        j=j+85372
+        c=c+1
+    else:
+        df3=df.iloc[i:j,:]
+        df4=df4.append(df3)
+        i=i+85372
+        j=j+85372
+        c=c+1
+
+
+print(df2.shape)
+df2.to_csv('sub_0_28_day.csv')
+print(df4.shape)
+df4.to_csv('sub_28_56_day.csv')
+
+
 stop = time.time()
-print(j)
 print("--- %s seconds ---" % (time.time() - start))
+
