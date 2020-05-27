@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 from xgboost import XGBRegressor
 import os
 import matplotlib.pyplot as plt
+from sklearn.model_selection import GridSearchCV
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_squared_error
 import time
@@ -31,8 +32,8 @@ df2_sales_train = df_sales_train.iloc[:, 6:].rename(columns=cal_dict)
 df_master = pd.concat([df1_sales_train, df2_sales_train], axis=1).drop('id', axis=1)
 
 
-
 #Initializing and Mapping:
+
 items = df_master['item_id'].unique()
 state = df_master['state_id'].unique()
 stores = df_master['store_id'].unique()
@@ -75,13 +76,25 @@ df2 = df2.reindex(columns=['store_id', 'snap_CA', 'snap_TX', 'snap_WI', 'events_
 
 #Into the Model:
 
-start = time.time()
-j = 1
+
+#Hyperparameter Tuning:
+
+n=[i for i in np.arange(100,300,100)]
+l=[0.001,0.05,0.01,0.1]
+#md=[i for i in range(4,8)]
+#lam=[i for i in np.arange(0,1.1,0.1)]
+#gam=[i for i in np.arange(0,1.1,0.1)]
+param={'n_estimators':n,'learning_rate':l}
+hyp=[]
+
+
+start=time.time()
+print('--------STARTING---------')
 
 # Training file creation and model build:
+
 for i in items:
 
-        print(i)
         df1 = df_master.loc[df_master['item_id'] == i]
         df1 = pd.melt(id_vars=['store_id'], value_vars=df_master.iloc[:, 5:], var_name='Date', value_name='Sales',frame=df1)
         df1 = df1.sort_values(['store_id', 'Date'])
@@ -106,17 +119,26 @@ for i in items:
         X = df1.drop('Sales', axis=1).values
         y = df1['Sales'].values
         X_pred = df2.values
-        xgb = XGBRegressor()
-        xgb.fit(X, y)
-        y_pred = xgb.predict(X_pred)
-        sub1=pd.concat([sub1,pd.DataFrame(y_pred)],axis=0,ignore_index=True)
-        j = j + 1
+        xgb1 = XGBRegressor(silent=True)
 
+        start1=time.time()
+
+        xgb = GridSearchCV(xgb1,param_grid=param,cv=3)
+        xgb.fit(X, y)
+
+        hyp.append(xgb.best_params_)
+        y_pred=xgb.predict(X_pred)
+
+        sub1=pd.concat([sub1,pd.DataFrame(y_pred)],axis=0,ignore_index=True)
+        print(i +' : ' " %s seconds " % (time.time() - start1))
+        print(xgb.best_params_)
+        print()
 
 stop = time.time()
-print("--- %s seconds ---" % (time.time() - start))
-
-
+print('---------COMPLETED-------')
+print('Model run time  : '+' %s seconds ' % (time.time() - start))
+hyp.to_csv('hyp.csv')
+sub1.to_csv('prediction_file_raw.csv')
 
 #Creating the output prediction file:
 
@@ -156,7 +178,6 @@ submission_01 = pd.merge(left=submission_01,right=Temp_01,on=['id'],how='right')
 submission_02 = pd.merge(left=submission_02,right = Temp_02 ,on=['id'],how='right')
 
 
-
 Columns_Final_List = ['F{0}'.format(i) for i in range(0,29)]
 submission_01.columns=Columns_Final_List
 submission_02.columns=Columns_Final_List
@@ -165,10 +186,10 @@ Submission_File = Submission_File.rename(columns={'F0':'id'})
 sample_submission = pd.read_csv('sample_submission.csv')
 Submission_File['id'] = sample_submission['id']
 cols = Submission_File.columns
-Submission_File[cols[1:]] = Submission_File[cols[1:]].round(0)
-Submission_File.to_csv('final_submission.csv',index=False)
+Submission_File[cols[1:]] = Submission_File[cols[1:]].round(0).mask(Submission_File[cols[1:]]<=0,0)
+Submission_File.to_csv('final_submission_xgb_base_tuned.csv',index=False)
 
 
 stop = time.time()
-print("--- %s seconds ---" % (time.time() - start))
+print('Overall Run Time : '+' %s seconds ---' % (time.time() - start))
 
